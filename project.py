@@ -28,6 +28,11 @@ barrarect.move_ip(240, 450)  # Posicionar el bate en la ventana
 # Fuente para mostrar mensajes (por ejemplo, "Game Over")
 fuente = pygame.font.Font(None, 36)
 
+#variables para la celeracion de la barra
+velocidad_barra = 3  #velocidad inicial
+aceleracion = 0.2  #aumento progresivo de velocidad
+velocidad_maxima = 8  #limite superior de velocidad
+
 # Variable para controlar el bucle principal del juego
 jugando = True
 while jugando:
@@ -36,12 +41,20 @@ while jugando:
         if event.type == pygame.QUIT:
             jugando = False
 
-    # Movimiento del bate con las teclas izquierda y derecha
+    # Movimiento del bate con las teclas izquierda y derecha mas aceleracion
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         barrarect = barrarect.move(-3, 0)  # Mover el bate a la izquierda
+        barrarect.x = max(0, barrarect.x - 3) # eviar que la barra salga por la izquierda 
+       # velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima) #aumenta la velocidad
+
     if keys[pygame.K_RIGHT]:
         barrarect = barrarect.move(3, 0)   # Mover el bate a la derecha
+        barrarect.x = min(ventana.get_width() - barrarect.width, barrarect.x + 3)  # Evita que la barra salga por la derecha
+       # velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima) #aumenta la velocidad
+    
+    #else:
+       # velocidad_barra = max(3, velocidad_barra - aceleracion) #desaceleracion
 
     # Detección de colisión entre el bate y la pelota para rebotar la pelota
     if barrarect.colliderect(ballrect):
