@@ -50,4 +50,4 @@ while jugando:
     pygame.display.flip()
     pygame.time.Clock().tick(60)
 
-pygame.quit()
+
