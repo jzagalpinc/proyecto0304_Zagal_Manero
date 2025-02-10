@@ -1,10 +1,10 @@
-import pygame
+import pygame 
 from random import randint
 
 pygame.init()
 # Crear la ventana del juego con dimensiones 640x480 píxeles
 ventana = pygame.display.set_mode((640, 480))
-pygame.display.set_caption("Ejemplo 4")
+pygame.display.set_caption("Zagal_Manero")
 
 # -------------------------------
 # Cargar y escalar la imagen de la pelota
