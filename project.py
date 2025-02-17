@@ -41,20 +41,42 @@ rebotes_para_acelerar = 5 #numero de reboes para aumentar la velocidad
 #----------------------------------------------------------
 # CREAMOS LA CLASE LADRILLO
 class Ladrillo:
-    def __init__(self, x, y):
+    def __init__(self, x, y, color):
         self.rect = pygame.Rect(x, y, 60, 20) #definimos el rectangulo del ladrillo
+        self.color = color #color del ladrillo
         self.estado = True #activo o destruido (True=no destruido)
     
     def dibujar (self, ventana):
         if self.estado: #si el ladrillo no esta destruido lo dibujamos
-            pygame.draw.rect(ventana, (255,0,0), self.rect)
+            pygame.draw.rect(ventana, self.color, self.rect)
     
     def destruir (self):
         self.estado = False #cambiamos el estado a desruido
 
+    def colision(self, pelota):
+        if self.estado: #si el ladrillo no esta destruido
+            if self.rect.colliderect(pelota):
+                self.destruir() #destruimos el ladrillo
+                return True
+        return False
+
 #----------------------------------------------------------
-# CREAMOS UN LADRILLO
-ladrillo = Ladrillo (270, 100)
+# CREAMOS HERENCIA DE LADRILLO PARA LADRILLOIRROMPIBLE
+class LadrilloIrrompible(Ladrillo):
+    def __init__(self, x, y, color):
+        super().__init__(x, y, color) #llamamos al constructor de la clase
+        self.estado = True #ladrillo irrompible
+    
+    def colision(self, pelota): #en estta clase no se destrulle el ladrillo
+        if self.estado:
+            if self.rect.colliderect(pelota):
+                return True #el ladrillo se toca pero no se destrulle
+        return False
+
+#----------------------------------------------------------
+# CREAMOS LOS LADRILLOS
+ladrillo1 = Ladrillo (270, 100, (0,0,255)) #ladrillo normal
+ladrillo2 = LadrilloIrrompible (200,100, (0,255,0)) #ladrillo irrompible
 
 #----------------------------------------------------------
 # CRONTROLAR EL JUEGO
@@ -113,13 +135,18 @@ while jugando:
         ventana.fill((252, 243, 207)) #llenamos la ventana con color
         ventana.blit(ball, ballrect) #dibujamos la pelota
         ventana.blit(barra, barrarect) #dibujamos la barra
-    # Dibujamos el ladrillo
-    ladrillo.dibujar(ventana)
+
+    # Dibujamos los ladrillos
+    ladrillo1.dibujar(ventana)
+    ladrillo2.dibujar(ventana)
 
     # Verificamos si la pelota choca con el ladrillo
-    if ballrect.colliderect(ladrillo.rect) and ladrillo.estado:
-        ladrillo.destruir() #destruimos el ladrillo si la pelota lo toca
-        speed [1] = -speed[1] #la pelota rebota
+    if ladrillo1.colision(ballrect): #comprobamos la colision con el ladrillo
+        speed[1] = -speed[1] #la pelota rebota
+
+    if ladrillo2.colision(ballrect): #comprobamos la colision con el ladrillo irrompible
+        speed[1] = -speed[1] #la pelota rebota
+        
     # Actualizar la pantalla para mostrar los cambios
     pygame.display.flip()
 
