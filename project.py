@@ -39,6 +39,24 @@ incremento_velocidad = 0.5 #cantidad de aumento de velocidad cada ciertos revote
 rebotes_para_acelerar = 5 #numero de reboes para aumentar la velocidad
 
 #----------------------------------------------------------
+# CREAMOS LA CLASE LADRILLO
+class Ladrillo:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 60, 20) #definimos el rectangulo del ladrillo
+        self.estado = True #activo o destruido (True=no destruido)
+    
+    def dibujar (self, ventana):
+        if self.estado: #si el ladrillo no esta destruido lo dibujamos
+            pygame.draw.rect(ventana, (255,0,0), self.rect)
+    
+    def destruir (self):
+        self.estado = False #cambiamos el estado a desruido
+
+#----------------------------------------------------------
+# CREAMOS UN LADRILLO
+ladrillo = Ladrillo (270, 100)
+
+#----------------------------------------------------------
 # CRONTROLAR EL JUEGO
 jugando = True
 while jugando:
@@ -95,10 +113,16 @@ while jugando:
         ventana.fill((252, 243, 207)) #llenamos la ventana con color
         ventana.blit(ball, ballrect) #dibujamos la pelota
         ventana.blit(barra, barrarect) #dibujamos la barra
+    # Dibujamos el ladrillo
+    ladrillo.dibujar(ventana)
 
+    # Verificamos si la pelota choca con el ladrillo
+    if ballrect.colliderect(ladrillo.rect) and ladrillo.estado:
+        ladrillo.destruir() #destruimos el ladrillo si la pelota lo toca
+        speed [1] = -speed[1] #la pelota rebota
     # Actualizar la pantalla para mostrar los cambios
     pygame.display.flip()
-    
+
     # Controlar la tasa de refresco (60 FPS)
     pygame.time.Clock().tick(60)
 
