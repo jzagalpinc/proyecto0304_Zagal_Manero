@@ -1,92 +1,104 @@
 import pygame 
 from random import randint
 
+#----------------------------------------------------------
+# CREAMOS LA VENTANA
 pygame.init()
-# Crear la ventana del juego con dimensiones 640x480 píxeles
-ventana = pygame.display.set_mode((640, 480))
+ventana = pygame.display.set_mode((640, 480)) #crear la ventana del juego con dimensiones 640x480 píxeles
 pygame.display.set_caption("Zagal_Manero")
 
-# -------------------------------
-# Cargar y escalar la imagen de la pelota
-# -------------------------------
-ball = pygame.image.load("ball.png")
-# Redimensionar la pelota a 20x20 píxeles (tamaño estándar y no muy grande)
-ball = pygame.transform.scale(ball, (20, 20))
-ballrect = ball.get_rect()  # Obtener el rectángulo delimitador de la pelota
-speed = [randint(3, 6), randint(3, 6)]  # Asignar velocidades aleatorias en x e y
-ballrect.move_ip(0, 0)  # Posicionar la pelota (sin desplazarla)
+#----------------------------------------------------------
+# AÑADIMOS LA PELOTA
+ball = pygame.image.load("ball.png") #cargamos la imagen de la pelota
+ball = pygame.transform.scale(ball, (20, 20)) #redimensionamos la pelota 
+ballrect = ball.get_rect() #marcar el cuadrado delimitador de la pelota
+speed = [randint(3, 6), randint(3, 6)]  #asignar velocidades aleatorias en x e y
+ballrect.move_ip(0, 0)  #posicionar la pelota
 
-# -------------------------------
-# Cargar y escalar la imagen del bate (barra)
-# -------------------------------
-barra = pygame.image.load("barra.png")
-# Redimensionar el bate a 100x15 píxeles (tamaño estándar)
-barra = pygame.transform.scale(barra, (100, 15))
-barrarect = barra.get_rect()  # Obtener el rectángulo delimitador del bate
-barrarect.move_ip(240, 450)  # Posicionar el bate en la ventana
+#--------------------------------------------------------
+# AÑADIMOS LA BARRA
+barra = pygame.image.load("barra.png") #cargamos la imagen de la barra
+barra = pygame.transform.scale(barra, (100, 15)) #redimensionamos la barra
+barrarect = barra.get_rect()  #obtener el rectángulo delimitador la barra
+barrarect.move_ip(240, 450)  #posicionamos el bate en la ventana
 
-# Fuente para mostrar mensajes (por ejemplo, "Game Over")
-fuente = pygame.font.Font(None, 36)
+#--------------------------------------------------------
+# AÑADIMOS LA FUENTE DE LA LETRA
+fuente = pygame.font.Font(None, 36) #fuente para mosTrar mensajes
 
-#variables para la celeracion de la barra
-velocidad_barra = 3  #velocidad inicial
-aceleracion = 0.2  #aumento progresivo de velocidad
-velocidad_maxima = 8  #limite superior de velocidad
+#--------------------------------------------------------
+# VELOCIDADES DE LA BARRA
+velocidad_barra = 3  #velocidad inicial de la barra
+aceleracion = 0.2  #aumento progresivo de velocidad de la barra
+velocidad_maxima = 8  #limite superior de velocidad de la barra
 
-# Variable para controlar el bucle principal del juego
+#---------------------------------------------------------
+# AUMENTO DE LA VELOCIDAD DE LA PELOTA
+rebotes = 0 #variable para conar el numero de rebotes en la barra
+incremento_velocidad = 0.5 #cantidad de aumento de velocidad cada ciertos revotes
+rebotes_para_acelerar = 5 #numero de reboes para aumentar la velocidad
+
+#----------------------------------------------------------
+# CRONTROLAR EL JUEGO
 jugando = True
 while jugando:
+
     # Manejo de eventos
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            jugando = False
+        if event.type == pygame.QUIT: #si el usuario cierra la venttana
+            jugando = False #terminamos el bucle y cerramos el juego
 
     # Movimiento del bate con las teclas izquierda y derecha mas aceleracion
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        barrarect = barrarect.move(-3, 0)  # Mover el bate a la izquierda
-        barrarect.x = max(0, barrarect.x - 3) # eviar que la barra salga por la izquierda 
-       # velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima) #aumenta la velocidad
+    keys = pygame.key.get_pressed() #obtenemos las teclas
+    if keys[pygame.K_LEFT]: #al presionar la tecla izquierda
+        velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima) #aumenta la velocidad
+        barrarect.x = max(0, barrarect.x - int(velocidad_barra))  # mueve la barra y evita que la barra salga por la izquierda 
 
-    if keys[pygame.K_RIGHT]:
-        barrarect = barrarect.move(3, 0)   # Mover el bate a la derecha
-        barrarect.x = min(ventana.get_width() - barrarect.width, barrarect.x + 3)  # Evita que la barra salga por la derecha
-       # velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima) #aumenta la velocidad
-    
-    #else:
-       # velocidad_barra = max(3, velocidad_barra - aceleracion) #desaceleracion
+    elif keys[pygame.K_RIGHT]: #al presionar la tecla derecha
+        velocidad_barra = min(velocidad_barra + aceleracion, velocidad_maxima)  #amenta la velocidad
+        barrarect.x = min(ventana.get_width() - barrarect.width, barrarect.x + int(velocidad_barra)) #mueve la barra y evita que la barra salga por la derecha
 
-    # Detección de colisión entre el bate y la pelota para rebotar la pelota
-    if barrarect.colliderect(ballrect):
-        speed[1] = -speed[1]  # Invertir la dirección vertical de la pelota
+    else:
+        velocidad_barra = max(3, velocidad_barra - aceleracion) #desaceleracion al no pulsar la barra
+
+    # Detección de colisión entre el bate y la pelota para rebotar la pelota y cambio de angulo
+    if barrarect.colliderect(ballrect): #si la pelota toca la barra
+        impacto = (ballrect.centerx - barrarect.centerx) / (barrarect.width / 2) #calculamos la posicion relativa del impacto en la barra
+        speed[1] = -speed[1] #invertimos la direccion en y en rebote normal
+        speed[0] += int(impacto * 2)  #modificamos la direccion en X segun el impacto
+        if speed[0] == 0: #evitamos el rebote recto
+            speed[0] = 1 if impacto > 0 else -1 #le damos un movimiento para dar movimiento
+        rebotes +=1 #aumentamos el numero de rebotes
+        if rebotes % rebotes_para_acelerar == 0: #aceleracion de la pelota cuando se llega al numero de rebotes
+            speed [0] *= 1 + incremento_velocidad #aumentamos velocidad en eje X
+            speed [1] *= 1 + incremento_velocidad #aumentamos velocidad en eje Y
 
     # Actualizar la posición de la pelota
     ballrect = ballrect.move(speed)
 
     # Rebotar la pelota al chocar con los bordes laterales
-    if ballrect.left < 0 or ballrect.right > ventana.get_width():
-        speed[0] = -speed[0]
+    if ballrect.left < 0 or ballrect.right > ventana.get_width(): #si la pelota toca el borde izquierdo o derecho
+        speed[0] = -speed[0] #cambiamos la direccion X para que rebote
+
     # Rebotar la pelota al chocar con el borde superior
-    if ballrect.top < 0:
-        speed[1] = -speed[1]
-    
-    # Comprobar si la pelota ha salido por el borde inferior (Game Over)
-    if ballrect.bottom > ventana.get_height():
-        # Renderizar el mensaje de "Game Over"
-        texto = fuente.render("Game Over", True, (125, 125, 125))
-        texto_rect = texto.get_rect()
-        texto_x = ventana.get_width() / 2 - texto_rect.width / 2
-        texto_y = ventana.get_height() / 2 - texto_rect.height / 2
-        ventana.blit(texto, [texto_x, texto_y])
-    else:
-        # Rellenar la ventana con un color de fondo claro
-        ventana.fill((252, 243, 207))
-        # Dibujar la pelota y el bate en la ventana
-        ventana.blit(ball, ballrect)
-        ventana.blit(barra, barrarect)
+    if ballrect.top < 0: #cuando la pelota toca el borde superior
+        speed[1] = -speed[1] # cambiamos la direccion Y para que rebote
+     
+    # Comprobar si la pelota ha salido por el borde inferior y Game Over
+    if ballrect.bottom > ventana.get_height(): #si la pelota sale por abajo
+        texto = fuente.render("Game Over", True, (125, 125, 125)) #creamos el mesaje
+        texto_rect = texto.get_rect() #obttenemos rectangulo para centrar el texto
+        texto_x = ventana.get_width() / 2 - texto_rect.width / 2 #lo centramos en X
+        texto_y = ventana.get_height() / 2 - texto_rect.height / 2 #lo cenramos en Y
+        ventana.blit(texto, [texto_x, texto_y]) #mosramos el mensaje en la pantalla
+    else: #si el juego no ha terminado 
+        ventana.fill((252, 243, 207)) #llenamos la ventana con color
+        ventana.blit(ball, ballrect) #dibujamos la pelota
+        ventana.blit(barra, barrarect) #dibujamos la barra
 
     # Actualizar la pantalla para mostrar los cambios
     pygame.display.flip()
+    
     # Controlar la tasa de refresco (60 FPS)
     pygame.time.Clock().tick(60)
 
